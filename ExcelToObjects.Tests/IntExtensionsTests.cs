@@ -16,9 +16,16 @@ namespace ExcelToObjects.Test {
         }
 
         [Fact]
-        public void ToLetter_NumberMatchesDoubleLetter_ReturnsNull() {
+        public void ToLetter_NumberMatchesDoubleLetter_ReturnsLetter() {
             string expectedLetter = "AA";
             int numToTest = 27;
+
+            Assert.Equal(expectedLetter, numToTest.ToLetter());
+        }
+        [Fact]
+        public void ToLetter_NumberIsZero_ReturnsNull() {
+            string expectedLetter = null;
+            int numToTest = 0;
 
             Assert.Equal(expectedLetter, numToTest.ToLetter());
         }

@@ -5,7 +5,7 @@ using System.Text;
 namespace ExcelToObjects.Extensions {
     public static class IntExtensions {
         /// <summary>
-        /// Convert an int to an Excel column name string (1 = A, 2 = B,..., 27 = AA, 28 = AB, etc)
+        /// Convert an int to an Excel column name string (1 = A, 2 = B, ..., 27 = AA, 28 = AB, etc)
         /// </summary>
         /// <param name="i"></param>
         /// <returns></returns>
@@ -15,6 +15,7 @@ namespace ExcelToObjects.Extensions {
                 result = (char)('A' + i % 26) + result;
                 i /= 26;
             }
+            if (result == "") { result = null; }
             return result;
         }
     }

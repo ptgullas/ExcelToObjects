@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using OfficeOpenXml;
 using EPPlus.DataExtractor;
+using ExcelToObjects.Extensions;
 
 namespace ExcelToObjects {
     public class Standardizer {
@@ -17,12 +18,49 @@ namespace ExcelToObjects {
 
         public List<string> GetHeaders(ExcelPackage package, int worksheetNum) {
             ExcelWorksheet worksheet = package.Workbook.Worksheets[worksheetNum]; //worksheetNum starts at 0
-            if (worksheetNum > worksheet.Workbook.Worksheets.Count - 1) {
+            if (worksheetNum <= (package.Workbook.Worksheets.Count - 1)) {
                 return worksheet.GetHeaderColumns();
             }
             else {
-                throw new ArgumentOutOfRangeException("Specified invalid worksheet number");
+                throw new ArgumentOutOfRangeException("worksheetNum", "Invalid worksheetNum");
             }
+        }
+
+        public List<Member> GetMembers(ExcelPackage package, int worksheetNum = 0) {
+            List<string> headers = GetHeaders(package, worksheetNum);
+            ExcelWorksheet sheet = package.Workbook.Worksheets[worksheetNum];
+            List<Member> members = sheet
+                .Extract<Member>()
+                .WithProperty(p => p.LastName, GetLastNameColumnNumber(headers).ToLetter())
+                .WithProperty(p => p.FirstName, GetFirstNameColumnNumber(headers).ToLetter())
+                .WithProperty(p => p.ZipCode, GetZipCodeColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.Address, GetAddressColumnNumber(headers).ToLetter())
+                
+
+                .GetData(2, sheet.Dimension.Rows)
+                .ToList();
+            return members;
+        }
+
+        // Last Name, First Name, Zip Code headers are all unlikely to start with anything else but those 3 words
+        public int GetLastNameColumnNumber(List<string> headers) {
+            return GetColumnNumberOfFieldThatStartsWith(headers, "Last");
+        }
+
+        public int GetFirstNameColumnNumber(List<string> headers) {
+            return GetColumnNumberOfFieldThatStartsWith(headers, "First");
+        }
+
+        public int GetZipCodeColumnNumber(List<string> headers) {
+            return GetColumnNumberOfFieldThatStartsWith(headers, "Zip");
+        }
+
+        public int GetAddressColumnNumber(List<string> headers) {
+            int addressColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Add");
+            if (addressColumnNumber == 0) {
+                addressColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Street");
+            }
+            return addressColumnNumber;
         }
 
         public int GetColumnNumberOfFieldThatStartsWith(List<string> headers, string fieldNameToSearch) {
