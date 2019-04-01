@@ -6,6 +6,7 @@ using System.Text;
 using OfficeOpenXml;
 using EPPlus.DataExtractor;
 using ExcelToObjects.Extensions;
+using System.Drawing;
 
 namespace ExcelToObjects {
     public class Standardizer {
@@ -35,11 +36,63 @@ namespace ExcelToObjects {
                 .WithProperty(p => p.FirstName, GetFirstNameColumnNumber(headers).ToLetter())
                 .WithProperty(p => p.ZipCode, GetZipCodeColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.Address, GetAddressColumnNumber(headers).ToLetter())
-                
+                .WithOptionalProperty(p => p.City, GetCityColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.State, GetStateColumnNumber(headers).ToLetter())
 
                 .GetData(2, sheet.Dimension.Rows)
                 .ToList();
             return members;
+        }
+
+        public void ExportMembers(ExcelPackage package, string worksheetName, List<Member> members) {
+            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add(worksheetName);
+            PopulateHeaders(worksheet);
+            FormatHeaders(worksheet);
+            PopulateMembers(members, worksheet);
+        }
+
+        private static void PopulateMembers(List<Member> members, ExcelWorksheet worksheet) {
+            if (members.Count > 0) {
+                int rowStart = 2;
+                int row = rowStart;
+                foreach (Member m in members) {
+                    worksheet.Cells[row, 1].Value = m.LastName;
+                    worksheet.Cells[row, 2].Value = m.FirstName;
+                    worksheet.Cells[row, 3].Value = m.MiddleName;
+                    worksheet.Cells[row, 4].Value = m.NameSuffix;
+                    worksheet.Cells[row, 5].Value = m.Address;
+                    worksheet.Cells[row, 6].Value = m.City;
+                    worksheet.Cells[row, 7].Value = m.State;
+                    worksheet.Cells[row, 8].Value = m.ZipCode;
+                    worksheet.Cells[row, 9].Value = m.Phone;
+                    worksheet.Cells[row, 10].Value = m.Email;
+                    worksheet.Cells[row, 11].Value = m.DateOfBirth;
+                    row++;
+                }
+            }
+        }
+
+        private static void FormatHeaders(ExcelWorksheet worksheet) {
+            using (ExcelRange range = worksheet.Cells["A1:K1"]) {
+                range.Style.Font.Bold = true;
+                range.Style.Font.Color.SetColor(Color.FromArgb(217, 225, 242));
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(32, 55, 100));
+            }
+        }
+
+        private static void PopulateHeaders(ExcelWorksheet worksheet) {
+            worksheet.Cells[1, 1].Value = "Last Name";
+            worksheet.Cells[1, 2].Value = "First Name";
+            worksheet.Cells[1, 3].Value = "Middle Name";
+            worksheet.Cells[1, 4].Value = "Suffix";
+            worksheet.Cells[1, 5].Value = "Street Address";
+            worksheet.Cells[1, 6].Value = "City";
+            worksheet.Cells[1, 7].Value = "State";
+            worksheet.Cells[1, 8].Value = "Zip Code";
+            worksheet.Cells[1, 9].Value = "Phone";
+            worksheet.Cells[1, 10].Value = "E-mail";
+            worksheet.Cells[1, 11].Value = "Date of Birth";
         }
 
         // Last Name, First Name, Zip Code headers are all unlikely to start with anything else but those 3 words
@@ -61,6 +114,14 @@ namespace ExcelToObjects {
                 addressColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Street");
             }
             return addressColumnNumber;
+        }
+
+        public int GetCityColumnNumber(List<string> headers) {
+            return GetColumnNumberOfFieldThatStartsWith(headers, "City");
+        }
+
+        public int GetStateColumnNumber(List<string> headers) {
+            return GetColumnNumberOfFieldThatStartsWith(headers, "St");
         }
 
         public int GetColumnNumberOfFieldThatStartsWith(List<string> headers, string fieldNameToSearch) {
