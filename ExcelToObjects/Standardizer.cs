@@ -10,11 +10,11 @@ using System.Drawing;
 
 namespace ExcelToObjects {
     public class Standardizer {
-        public string _filePath;
-        private FileInfo _spreadsheetFile;
-        public Standardizer(string filePath) {
-            _filePath = filePath;
-            _spreadsheetFile = new FileInfo(_filePath);
+        //public string _filePath;
+        //private FileInfo _spreadsheetFile;
+        public Standardizer() {
+            //_filePath = filePath;
+            //_spreadsheetFile = new FileInfo(_filePath);
         }
 
         public List<string> GetHeaders(ExcelPackage package, int worksheetNum) {

@@ -10,7 +10,7 @@ namespace ExcelToObjects.Tests {
         public void GetColumnNumberOfFieldThatStartsWith_ColumnExists_ReturnsColNumber() {
             string filePath = @"C:\Users\Prime Time Pauly G\Documents\ProgHackNight TestAddresses.xlsx";
             FileInfo spreadsheetFile = new FileInfo(filePath);
-            Standardizer standardizer = new Standardizer(filePath);
+            Standardizer standardizer = new Standardizer();
             string fieldNameToSearch = "Phone";
             int expectedColumnNumber = 7;
 
@@ -33,7 +33,7 @@ namespace ExcelToObjects.Tests {
             string expectedFirstColumn = "Last";
             string expectedLastColumn = "E-Mail address";
 
-            Standardizer standardizer = new Standardizer(filePath);
+            Standardizer standardizer = new Standardizer();
 
             List<string> headers = new List<string>();
 
@@ -58,7 +58,7 @@ namespace ExcelToObjects.Tests {
 
             string expectedAddress = "51-38 Codwise Pl";
 
-            Standardizer standardizer = new Standardizer(filePath);
+            Standardizer standardizer = new Standardizer();
 
             List<Member> members = new List<Member>();
 
@@ -82,7 +82,7 @@ namespace ExcelToObjects.Tests {
             string expectedZip = null;
             int expectedCount = 4;
 
-            Standardizer standardizer = new Standardizer(filePath);
+            Standardizer standardizer = new Standardizer();
 
             List<Member> members = new List<Member>();
 
@@ -101,7 +101,7 @@ namespace ExcelToObjects.Tests {
         public void GetColumnNumberOfFieldThatStartsWith_ColumnDoesNotExist_ReturnsZero() {
             string filePath = @"C:\Users\Prime Time Pauly G\Documents\ProgHackNight TestAddresses.xlsx";
             FileInfo spreadsheetFile = new FileInfo(filePath);
-            Standardizer standardizer = new Standardizer(filePath);
+            Standardizer standardizer = new Standardizer();
             string fieldNameToSearch = "Favorite Weapon";
             int expectedColumnNumber = 0;
 
@@ -121,7 +121,7 @@ namespace ExcelToObjects.Tests {
         public void GetLastNameColumnNumber_ColumnExists_ReturnsColNumber() {
             string filePath = @"C:\Users\Prime Time Pauly G\Documents\ProgHackNight TestAddresses.xlsx";
             FileInfo spreadsheetFile = new FileInfo(filePath);
-            Standardizer standardizer = new Standardizer(filePath);
+            Standardizer standardizer = new Standardizer();
             int expectedColumnNumber = 1;
 
             List<string> myHeaders;
