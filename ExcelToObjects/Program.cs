@@ -4,6 +4,8 @@ using System.IO;
 using OfficeOpenXml;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Serilog;
+using System.Threading.Tasks;
 
 namespace ExcelToObjects {
     class Program {
@@ -11,7 +13,16 @@ namespace ExcelToObjects {
         public static IConfigurationRoot Configuration;
 
 
-        static void Main(string[] args) {
+        static async Task Main(string[] args) {
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("c:\\temp\\logs\\ExcelToObjects\\ExcelToObjectsLog.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+            Log.Information("Started ExcelToObjects log on {a}", DateTime.Now.ToLongTimeString());
+
+
             string projectRoot = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.LastIndexOf(@"\bin"));
             var builder = new ConfigurationBuilder()
                 .SetBasePath(projectRoot)
@@ -20,15 +31,23 @@ namespace ExcelToObjects {
             Configuration = builder.Build();
 
             try {
-                string inputPath = Configuration.GetSection("Folders").GetValue<string>("inputFolder");
-                string myPath = @"C:\Users\Prime Time Pauly G\Documents\ProgHackNight TestAddresses.xlsx";
-                string outputDir = @"C:\temp\ProgHackKnight_output";
-                Directory.CreateDirectory(outputDir);
-                ProcessFilesInInputFolder(inputPath, outputDir);
+                //string GoogleApiKey = Configuration.GetValue<string>("GoogleApiKey");
+                //ZipCodeRetrieverService zipRetriever = new ZipCodeRetrieverService(GoogleApiKey);
+                //string myAddress = "225 e 17th street, new york ny";
+                //string myZip = await zipRetriever.GetZip(myAddress);
+                //Console.WriteLine($"Full Address is {myAddress} {myZip}");
+                ProcessSpreadsheets();
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        private static void ProcessSpreadsheets() {
+            string inputPath = Configuration.GetSection("Folders").GetValue<string>("inputFolder");
+            string outputDir = @"C:\temp\ProgHackKnight_output";
+            Directory.CreateDirectory(outputDir);
+            ProcessFilesInInputFolder(inputPath, outputDir);
         }
 
         private static void ProcessFilesInInputFolder(string inputFolder, string outputFolder)
