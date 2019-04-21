@@ -18,5 +18,25 @@ namespace ExcelToObjects {
         public string MiddleName { get; set; }
         public string NameSuffix { get; set; }
 
+        public bool ContainsFullAddress() {
+            if ((!string.IsNullOrEmpty(Address))
+                && (!string.IsNullOrEmpty(City))
+                && (!string.IsNullOrEmpty(State))) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+        public string GetFullAddress() {
+            return $"{Address} {City} {State}";
+        }
+
+
+
     }
+
+
+
 }
