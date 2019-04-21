@@ -41,13 +41,17 @@ namespace ExcelToObjects {
         }
 
         public static string ReplaceInvalidChars(this string str, string strToReplace = "") {
-            // this is a colon, a backslash, and a forward slash, a # and a .
-            string invalidChars = "[:\\\\/#.]";
+            // this is a colon, a backslash, and a forward slash, and a .
+            string invalidChars = "[:\\\\/.]";
             return Regex.Replace(str, invalidChars, strToReplace);
         }
 
         public static string ReplaceWhitespaceWithSingleSpace(this string str) {
             return Regex.Replace(str, @"\s+", " ");
+        }
+
+        public static string RemoveWhitespace(this string str) {
+            return str.Replace(" ", string.Empty);
         }
 
         // taken from https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format
