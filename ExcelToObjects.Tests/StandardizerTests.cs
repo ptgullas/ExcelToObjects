@@ -4,7 +4,7 @@ using Xunit;
 using OfficeOpenXml;
 using System.Collections.Generic;
 
-namespace ExcelToObjects.Tests {
+namespace ExcelToObjects.Test {
     public class StandardizerTests {
         [Fact]
         public void GetColumnNumberOfFieldThatStartsWith_ColumnExists_ReturnsColNumber() {

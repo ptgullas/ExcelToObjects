@@ -4,7 +4,7 @@ using Xunit;
 using OfficeOpenXml;
 using System.Collections.Generic;
 
-namespace ExcelToObjects.Tests {
+namespace ExcelToObjects.Test {
     public class ExcelWorksheetExtensionsTests {
         [Fact]
         public void GetHeaderColumns_NormalHeaders_Passes() {
