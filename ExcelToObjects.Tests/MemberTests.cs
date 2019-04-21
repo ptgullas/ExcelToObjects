@@ -88,7 +88,7 @@ namespace ExcelToObjects.Test {
                 State = "NY"
             };
 
-            string expected = "205 W 95th St 23";
+            string expected = "205 W 95th St #23";
 
             member.RemoveInvalidCharactersFromAddress();
             Assert.Equal(expected, member.Address);

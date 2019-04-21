@@ -13,7 +13,8 @@ namespace ExcelToObjects {
         public string NameSuffix { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
-        public string State { get; set; }
+        private string state;
+        public string State { get { return state;  } set { state = value.ToUpper(); } }
         public string CellPhone { get; set; }
         public string HomePhone { get; set; }
         public string Email { get; set; }
