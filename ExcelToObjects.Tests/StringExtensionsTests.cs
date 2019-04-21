@@ -15,5 +15,13 @@ namespace ExcelToObjects.Test {
 
             Assert.True(result);
         }
+
+        [Fact]
+        public void ReplaceWhitespaceWithSingleSpace_ReplaceMultipleSpaces() {
+            string strToTest = "2289    Broadway #3E";
+            string expected = "2289 Broadway #3E";
+
+            Assert.Equal(expected, strToTest.ReplaceWhitespaceWithSingleSpace());
+        }
     }
 }

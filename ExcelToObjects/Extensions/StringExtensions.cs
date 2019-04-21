@@ -46,6 +46,10 @@ namespace ExcelToObjects {
             return Regex.Replace(str, invalidChars, strToReplace);
         }
 
+        public static string ReplaceWhitespaceWithSingleSpace(this string str) {
+            return Regex.Replace(str, @"\s+", " ");
+        }
+
         // taken from https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format
 
         public static bool IsValidEmail(this string email) {
