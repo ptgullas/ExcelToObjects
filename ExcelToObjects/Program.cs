@@ -104,6 +104,10 @@ namespace ExcelToObjects {
             List<Member> newMembers = new List<Member>();
             foreach (Member m in members) {
                 m.PadZipCodeWithZeroes();
+                m.ReplaceNumberSignInAddressWithApt();
+                m.RemoveNonAlphanumericFromAddress();
+                m.RemoveMultipleSpacesFromAddress();
+                m.RemoveNonNumericFromPhones();
                 m.ZipCode = await memberProcessor.GetZipFromMemberAddress(m);
                 newMembers.Add(m);
             }

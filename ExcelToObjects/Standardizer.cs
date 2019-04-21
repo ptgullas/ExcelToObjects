@@ -84,15 +84,16 @@ namespace ExcelToObjects {
                 int rowStart = 2;
                 int row = rowStart;
                 foreach (Member m in members) {
-                    worksheet.Cells[row, 1].Value = m.LastName;
-                    worksheet.Cells[row, 2].Value = m.FirstName;
-                    worksheet.Cells[row, 3].Value = m.MiddleName;
+                    worksheet.Cells[row, 1].Value = m.FirstName;
+                    worksheet.Cells[row, 2].Value = m.MiddleName;
+                    worksheet.Cells[row, 3].Value = m.LastName;
                     worksheet.Cells[row, 4].Value = m.NameSuffix;
                     worksheet.Cells[row, 5].Value = m.Address;
                     worksheet.Cells[row, 6].Value = m.City;
                     worksheet.Cells[row, 7].Value = m.State;
                     worksheet.Cells[row, 8].Value = m.ZipCode;
-                    worksheet.Cells[row, 9].Value = m.Phone;
+                    worksheet.Cells[row, 9].Value = m.HomePhone;
+                    worksheet.Cells[row, 10].Value = m.CellPhone;
                     worksheet.Cells[row, 10].Value = m.Email;
                     worksheet.Cells[row, 11].Value = m.DateOfBirth;
                     row++;

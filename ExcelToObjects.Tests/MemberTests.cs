@@ -110,6 +110,24 @@ namespace ExcelToObjects.Test {
             Assert.Equal(expected, member.Address);
         }
 
+        [Fact]
+        public void RemoveNonNumericFromPhones_Removes() {
+            Member member = new Member() {
+                LastName = "Stark",
+                FirstName = "Lyanna",
+                Address = "205 W. 95th St #23",
+                City = "New York",
+                State = "NY",
+                CellPhone = "(917) 555-1212",
+                HomePhone = "(718) 555-1223"
+            };
+            string expectedCell = "9175551212";
+
+            member.RemoveNonNumericFromPhones();
+            Assert.Equal(expectedCell, member.CellPhone);
+
+        }
+
 
     }
 }
