@@ -36,27 +36,35 @@ namespace ExcelToObjects {
                 //string myAddress = "225 e 17th street, new york ny";
                 //string myZip = await zipRetriever.GetZip(myAddress);
                 //Console.WriteLine($"Full Address is {myAddress} {myZip}");
-                ProcessSpreadsheets();
+                await ProcessSpreadsheets();
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
         }
 
-        private static void ProcessSpreadsheets() {
+        private static async Task ProcessSpreadsheets() {
             string inputPath = Configuration.GetSection("Folders").GetValue<string>("inputFolder");
             string outputDir = @"C:\temp\ProgHackKnight_output";
             Directory.CreateDirectory(outputDir);
-            ProcessFilesInInputFolder(inputPath, outputDir);
+            if (Directory.Exists(inputPath)) {
+                Log.Information("Processing folder {inputFolder}", inputPath);
+                await ProcessFilesInInputFolder(inputPath, outputDir);
+            }
+            else {
+                Log.Error<string>("Could not find folder {inputPath}", inputPath);
+            }
         }
 
-        private static void ProcessFilesInInputFolder(string inputFolder, string outputFolder)
+        private static async Task ProcessFilesInInputFolder(string inputFolder, string outputFolder)
         {
             List<string> inputSpreadsheets = GetFilePaths(inputFolder);
+            Log.Information("Found {spreadsheetCount} spreadsheets", inputSpreadsheets.Count);
             foreach (string path in inputSpreadsheets)
             {
+                Log.Information("Processing spreadsheet {path}", path);
                 Standardizer standardizer = new Standardizer();
-                ProcessSingleFile(path, outputFolder, standardizer);
+                await ProcessSingleFile(path, outputFolder, standardizer);
             }
         }
 
@@ -65,7 +73,7 @@ namespace ExcelToObjects {
             return Directory.GetFiles(inputFolder, "*.xlsx").ToList();
         }
 
-        private static void ProcessSingleFile(string myPath, string outputDir, Standardizer standardizer) {
+        private static async Task ProcessSingleFile(string myPath, string outputDir, Standardizer standardizer) {
             if (File.Exists(myPath)) {
                 FileInfo sourceFile = new FileInfo(myPath);
                 List<Member> members = new List<Member>();
@@ -74,15 +82,32 @@ namespace ExcelToObjects {
                     members = standardizer.GetMembers(package, 0);
                     newWorksheetName = GetWorksheetName(package, 0);
                 }
+
+                members = await ProcessMembers(members);
+
                 string newFilename = Path.GetFileNameWithoutExtension(myPath) + "_transformed.xlsx";
                 string targetPath = Path.Combine(outputDir, newFilename);
                 FileInfo targetFile = new FileInfo(targetPath);
+
 
                 using (ExcelPackage targetPackage = new ExcelPackage(targetFile)) {
                     standardizer.ExportMembers(targetPackage, newWorksheetName, members);
                     targetPackage.SaveAs(targetFile);
                 }
             }
+        }
+
+        static async Task<List<Member>> ProcessMembers(List<Member> members) {
+            string GoogleApiKey = Configuration.GetValue<string>("GoogleApiKey");
+            ZipCodeRetrieverService zipRetriever = new ZipCodeRetrieverService(GoogleApiKey);
+            MemberProcessor memberProcessor = new MemberProcessor(zipRetriever);
+            List<Member> newMembers = new List<Member>();
+            foreach (Member m in members) {
+                m.PadZipCodeWithZeroes();
+                m.ZipCode = await memberProcessor.GetZipFromMemberAddress(m);
+                newMembers.Add(m);
+            }
+            return newMembers;
         }
 
         static string GetWorksheetName(ExcelPackage package, int worksheetNum) {
