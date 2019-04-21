@@ -34,7 +34,12 @@ namespace ExcelToObjects {
                 .Extract<Member>()
                 .WithProperty(p => p.LastName, GetLastNameColumnNumber(headers).ToLetter())
                 .WithProperty(p => p.FirstName, GetFirstNameColumnNumber(headers).ToLetter())
-                .WithProperty(p => p.ZipCode, GetZipCodeColumnNumber(headers).ToLetter())
+                // ZipCode is technically required (and would normally use WithProperty), 
+                // but if it's missing in the spreadsheet, 
+                // then we will try & populate it using Address, City & State
+                // But, on the other hand, I think we might expect ZipCode to actually 
+                // be a column header; it just may not be populated on every field.
+                .WithOptionalProperty(p => p.ZipCode, GetZipCodeColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.Address, GetAddressColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.City, GetCityColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.State, GetStateColumnNumber(headers).ToLetter())
@@ -49,6 +54,29 @@ namespace ExcelToObjects {
             PopulateHeaders(worksheet);
             FormatHeaders(worksheet);
             PopulateMembers(members, worksheet);
+        }
+
+        private static void PopulateHeaders(ExcelWorksheet worksheet) {
+            worksheet.Cells[1, 1].Value = "Last Name";
+            worksheet.Cells[1, 2].Value = "First Name";
+            worksheet.Cells[1, 3].Value = "Middle Name";
+            worksheet.Cells[1, 4].Value = "Suffix";
+            worksheet.Cells[1, 5].Value = "Street Address";
+            worksheet.Cells[1, 6].Value = "City";
+            worksheet.Cells[1, 7].Value = "State";
+            worksheet.Cells[1, 8].Value = "Zip Code";
+            worksheet.Cells[1, 9].Value = "Phone";
+            worksheet.Cells[1, 10].Value = "E-mail";
+            worksheet.Cells[1, 11].Value = "Date of Birth";
+        }
+
+        private static void FormatHeaders(ExcelWorksheet worksheet) {
+            using (ExcelRange range = worksheet.Cells["A1:K1"]) {
+                range.Style.Font.Bold = true;
+                range.Style.Font.Color.SetColor(Color.FromArgb(217, 225, 242));
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(32, 55, 100));
+            }
         }
 
         private static void PopulateMembers(List<Member> members, ExcelWorksheet worksheet) {
@@ -70,29 +98,6 @@ namespace ExcelToObjects {
                     row++;
                 }
             }
-        }
-
-        private static void FormatHeaders(ExcelWorksheet worksheet) {
-            using (ExcelRange range = worksheet.Cells["A1:K1"]) {
-                range.Style.Font.Bold = true;
-                range.Style.Font.Color.SetColor(Color.FromArgb(217, 225, 242));
-                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(32, 55, 100));
-            }
-        }
-
-        private static void PopulateHeaders(ExcelWorksheet worksheet) {
-            worksheet.Cells[1, 1].Value = "Last Name";
-            worksheet.Cells[1, 2].Value = "First Name";
-            worksheet.Cells[1, 3].Value = "Middle Name";
-            worksheet.Cells[1, 4].Value = "Suffix";
-            worksheet.Cells[1, 5].Value = "Street Address";
-            worksheet.Cells[1, 6].Value = "City";
-            worksheet.Cells[1, 7].Value = "State";
-            worksheet.Cells[1, 8].Value = "Zip Code";
-            worksheet.Cells[1, 9].Value = "Phone";
-            worksheet.Cells[1, 10].Value = "E-mail";
-            worksheet.Cells[1, 11].Value = "Date of Birth";
         }
 
         // Last Name, First Name, Zip Code headers are all unlikely to start with anything else but those 3 words
