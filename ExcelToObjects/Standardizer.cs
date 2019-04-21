@@ -126,7 +126,12 @@ namespace ExcelToObjects {
         }
 
         public int GetStateColumnNumber(List<string> headers) {
-            return GetColumnNumberOfFieldThatStartsWith(headers, "St");
+            int stateColumnNumber = GetColumnNumberOfFieldThatMatches(headers, "St");
+            // column beginning w/ "St" might collide with "Street" so it has to match
+            if (stateColumnNumber == 0) {
+                stateColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "state");
+            }
+            return stateColumnNumber;
         }
 
         public int GetColumnNumberOfFieldThatStartsWith(List<string> headers, string fieldNameToSearch) {
@@ -141,6 +146,19 @@ namespace ExcelToObjects {
                 return 0;
             }
 
+        }
+
+        public int GetColumnNumberOfFieldThatMatches(List<string> headers, string fieldNameToSearch) {
+            var headersUpperCase = headers.Select(h => h.ToUpper()).ToList();
+            string fieldNameColText = headersUpperCase
+                .FirstOrDefault(h => h == fieldNameToSearch.ToUpper());
+            if (fieldNameColText != null) {
+                int fieldNameColNumber = headersUpperCase.IndexOf(fieldNameColText);
+                return fieldNameColNumber + 1; // Excel columns (and rows) are 1-based, not zero-based
+            }
+            else {
+                return 0;
+            }
         }
 
         private static void PrintHeadersWithKnownNumberOfColumns(ExcelPackage package) {
