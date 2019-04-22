@@ -95,6 +95,21 @@ namespace ExcelToObjects.Test {
         }
 
         [Fact]
+        public void RemoveInvalidCharactersFromAddress_AddressIsNull_DoesNothing() {
+            Member member = new Member() {
+                LastName = "Stark",
+                FirstName = "Lyanna",
+                City = "New York",
+                State = "NY"
+            };
+
+
+            member.RemoveInvalidCharactersFromAddress();
+            Assert.Null(member.Address);
+        }
+
+
+        [Fact]
         public void ReplaceNumberSignInAddressWithApt_Replaces() {
             Member member = new Member() {
                 LastName = "Stark",
@@ -123,7 +138,7 @@ namespace ExcelToObjects.Test {
             };
             string expectedCell = "9175551212";
 
-            member.RemoveNonNumericFromPhones();
+            member.RemoveNonNumericAndSpacesFromPhones();
             Assert.Equal(expectedCell, member.CellPhone);
 
         }

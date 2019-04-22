@@ -37,6 +37,7 @@ namespace ExcelToObjects {
                 //string myZip = await zipRetriever.GetZip(myAddress);
                 //Console.WriteLine($"Full Address is {myAddress} {myZip}");
                 await ProcessSpreadsheets();
+                Log.Information("Exiting nicely");
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -62,9 +63,14 @@ namespace ExcelToObjects {
             Log.Information("Found {spreadsheetCount} spreadsheets", inputSpreadsheets.Count);
             foreach (string path in inputSpreadsheets)
             {
-                Log.Information("Processing spreadsheet {path}", path);
-                Standardizer standardizer = new Standardizer();
-                await ProcessSingleFile(path, outputFolder, standardizer);
+                try {
+                    Log.Information("Processing spreadsheet {path}", path);
+                    Standardizer standardizer = new Standardizer();
+                    await ProcessSingleFile(path, outputFolder, standardizer);
+                }
+                catch (Exception e) {
+                    Log.Error(e, "Error processing spreadsheet {spreadsheetName}", path);
+                }
             }
         }
 
@@ -79,6 +85,7 @@ namespace ExcelToObjects {
                 List<Member> members = new List<Member>();
                 string newWorksheetName = null;
                 using (ExcelPackage package = new ExcelPackage(sourceFile)) {
+                    Log.Information("Retrieving members from {sourceFile}", sourceFile.Name);
                     members = standardizer.GetMembers(package, 0);
                     newWorksheetName = GetWorksheetName(package, 0);
                 }
@@ -103,13 +110,18 @@ namespace ExcelToObjects {
             MemberProcessor memberProcessor = new MemberProcessor(zipRetriever);
             List<Member> newMembers = new List<Member>();
             foreach (Member m in members) {
+                // Log.Information("Processing member {firstname} {lastname}", m.FirstName, m.LastName);
                 m.PadZipCodeWithZeroes();
                 m.ReplaceNumberSignInAddressWithApt();
                 m.RemoveNonAlphanumericFromAddress();
                 m.RemoveMultipleSpacesFromAddress();
-                m.RemoveNonNumericFromPhones();
-                m.ZipCode = await memberProcessor.GetZipFromMemberAddress(m);
+                m.RemoveNonNumericAndSpacesFromPhones();
+                m.ChangeZeroPhoneValuesToNull();
+                m.SetHomePhoneToNullIfSameAsCellPhone();
+                m.State = memberProcessor.GetStateAbbreviation(m);
+                // m.ZipCode = await memberProcessor.GetZipFromMemberAddress(m);
                 newMembers.Add(m);
+                // Log.Information("Adding {firstName} {lastName} to newMembers", m.FirstName, m.LastName);
             }
             return newMembers;
         }

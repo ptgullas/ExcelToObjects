@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using EPPlus.DataExtractor;
 using ExcelToObjects.Extensions;
 using System.Drawing;
+using Serilog;
 
 namespace ExcelToObjects {
     public class Standardizer {
@@ -40,10 +41,14 @@ namespace ExcelToObjects {
                 // But, on the other hand, I think we might expect ZipCode to actually 
                 // be a column header; it just may not be populated on every field.
                 .WithOptionalProperty(p => p.ZipCode, GetZipCodeColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.MiddleName, GetMiddleNameColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.Address, GetAddressColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.City, GetCityColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.State, GetStateColumnNumber(headers).ToLetter())
-
+                .WithOptionalProperty(p => p.CellPhone, GetCellPhoneColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.HomePhone, GetHomePhoneColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.Email, GetEmailColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.DateOfBirth, GetDateOfBirthColumnNumber(headers).ToLetter())
                 .GetData(2, sheet.Dimension.Rows)
                 .ToList();
             return members;
@@ -57,21 +62,22 @@ namespace ExcelToObjects {
         }
 
         private static void PopulateHeaders(ExcelWorksheet worksheet) {
-            worksheet.Cells[1, 1].Value = "Last Name";
-            worksheet.Cells[1, 2].Value = "First Name";
-            worksheet.Cells[1, 3].Value = "Middle Name";
+            worksheet.Cells[1, 1].Value = "First Name";
+            worksheet.Cells[1, 2].Value = "Middle Name";
+            worksheet.Cells[1, 3].Value = "Last Name";
             worksheet.Cells[1, 4].Value = "Suffix";
             worksheet.Cells[1, 5].Value = "Street Address";
             worksheet.Cells[1, 6].Value = "City";
             worksheet.Cells[1, 7].Value = "State";
             worksheet.Cells[1, 8].Value = "Zip Code";
-            worksheet.Cells[1, 9].Value = "Phone";
-            worksheet.Cells[1, 10].Value = "E-mail";
-            worksheet.Cells[1, 11].Value = "Date of Birth";
+            worksheet.Cells[1, 9].Value = "Home Phone";
+            worksheet.Cells[1, 10].Value = "Cell Phone";
+            worksheet.Cells[1, 11].Value = "E-mail";
+            worksheet.Cells[1, 12].Value = "Date of Birth";
         }
 
         private static void FormatHeaders(ExcelWorksheet worksheet) {
-            using (ExcelRange range = worksheet.Cells["A1:K1"]) {
+            using (ExcelRange range = worksheet.Cells["A1:L1"]) {
                 range.Style.Font.Bold = true;
                 range.Style.Font.Color.SetColor(Color.FromArgb(217, 225, 242));
                 range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -94,8 +100,8 @@ namespace ExcelToObjects {
                     worksheet.Cells[row, 8].Value = m.ZipCode;
                     worksheet.Cells[row, 9].Value = m.HomePhone;
                     worksheet.Cells[row, 10].Value = m.CellPhone;
-                    worksheet.Cells[row, 10].Value = m.Email;
-                    worksheet.Cells[row, 11].Value = m.DateOfBirth;
+                    worksheet.Cells[row, 11].Value = m.Email;
+                    worksheet.Cells[row, 12].Value = m.DateOfBirthStr;
                     row++;
                 }
             }
@@ -110,8 +116,17 @@ namespace ExcelToObjects {
             return GetColumnNumberOfFieldThatStartsWith(headers, "First");
         }
 
+        public int GetMiddleNameColumnNumber(List<string> headers) {
+            return GetColumnNumberOfFieldThatStartsWith(headers, "Middle");
+        }
+
+
         public int GetZipCodeColumnNumber(List<string> headers) {
-            return GetColumnNumberOfFieldThatStartsWith(headers, "Zip");
+            int zipColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Zip");
+            if (zipColumnNumber == 0) {
+                zipColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Zip");
+            }
+            return zipColumnNumber;
         }
 
         public int GetAddressColumnNumber(List<string> headers) {
@@ -119,11 +134,18 @@ namespace ExcelToObjects {
             if (addressColumnNumber == 0) {
                 addressColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Street");
             }
+            if (addressColumnNumber == 0) {
+                addressColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Street");
+            }
             return addressColumnNumber;
         }
 
         public int GetCityColumnNumber(List<string> headers) {
-            return GetColumnNumberOfFieldThatStartsWith(headers, "City");
+            int cityColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "City");
+            if (cityColumnNumber == 0 ) {
+                cityColumnNumber = GetColumnNumberOfFieldThatContains(headers, "City");
+            }
+            return cityColumnNumber;
         }
 
         public int GetStateColumnNumber(List<string> headers) {
@@ -132,34 +154,80 @@ namespace ExcelToObjects {
             if (stateColumnNumber == 0) {
                 stateColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "state");
             }
+            if (stateColumnNumber == 0) {
+                stateColumnNumber = GetColumnNumberOfFieldThatContains(headers, "State");
+            }
             return stateColumnNumber;
+        }
+
+        public int GetCellPhoneColumnNumber(List<string> headers) {
+            int cellPhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Cell");
+            if (cellPhoneColumnNumber == 0) {
+                cellPhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Phone");
+            }
+            if (cellPhoneColumnNumber == 0) {
+                cellPhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Telep");
+            }
+            return cellPhoneColumnNumber;
+        }
+
+        public int GetHomePhoneColumnNumber(List<string> headers) {
+            int homePhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Home Ph");
+            if (homePhoneColumnNumber == 0) {
+                homePhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Home Tel");
+            }
+            if (homePhoneColumnNumber == 0) {
+                homePhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Home #");
+            }
+            return homePhoneColumnNumber;
+        }
+
+        public int GetEmailColumnNumber(List<string> headers) {
+            int emailColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Email");
+            if (emailColumnNumber == 0) {
+                emailColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "E-mail");
+            }
+            return emailColumnNumber;
+        }
+
+        public int GetDateOfBirthColumnNumber(List<string> headers) {
+            int birthdateColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Birth");
+            if (birthdateColumnNumber == 0) {
+                birthdateColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "DOB");
+            }
+            return birthdateColumnNumber;
+        }
+
+        public int GetColumnNumberOfFieldThatContains(List<string> headers, string fieldNameToSearch) {
+            var headersUpperCase = headers.Select(h => h.ToUpper()).ToList();
+            string fieldNameColText = headersUpperCase
+                .FirstOrDefault(h => h.Contains(fieldNameToSearch.ToUpper()));
+            return TranslateHeaderToColumnNumber(headersUpperCase, fieldNameColText);
         }
 
         public int GetColumnNumberOfFieldThatStartsWith(List<string> headers, string fieldNameToSearch) {
             var headersUpperCase = headers.Select(h => h.ToUpper()).ToList();
-            string firstNameColText = headersUpperCase
+            string fieldNameColText = headersUpperCase
                 .FirstOrDefault(h => h.StartsWith(fieldNameToSearch.ToUpper()));
-            if (firstNameColText != null) {
-                int firstNameColNumber = headersUpperCase.IndexOf(firstNameColText);
+            return TranslateHeaderToColumnNumber(headersUpperCase, fieldNameColText);
+
+        }
+
+        private static int TranslateHeaderToColumnNumber(List<string> headersUpperCase, string fieldNameColText) {
+            if (fieldNameColText != null) {
+                int firstNameColNumber = headersUpperCase.IndexOf(fieldNameColText);
                 return firstNameColNumber + 1; // Excel columns (and rows) are 1-based, not zero-based
             }
             else {
                 return 0;
             }
-
         }
 
         public int GetColumnNumberOfFieldThatMatches(List<string> headers, string fieldNameToSearch) {
             var headersUpperCase = headers.Select(h => h.ToUpper()).ToList();
             string fieldNameColText = headersUpperCase
                 .FirstOrDefault(h => h == fieldNameToSearch.ToUpper());
-            if (fieldNameColText != null) {
-                int fieldNameColNumber = headersUpperCase.IndexOf(fieldNameColText);
-                return fieldNameColNumber + 1; // Excel columns (and rows) are 1-based, not zero-based
-            }
-            else {
-                return 0;
-            }
+            return TranslateHeaderToColumnNumber(headersUpperCase, fieldNameColText);
         }
 
         private static void PrintHeadersWithKnownNumberOfColumns(ExcelPackage package) {

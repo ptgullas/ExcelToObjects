@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Serilog;
 
 namespace ExcelToObjects {
     public class Member {
@@ -13,20 +14,32 @@ namespace ExcelToObjects {
         public string NameSuffix { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
-        private string state;
-        public string State { get { return state;  } set { state = value.ToUpper(); } }
+        public string State { get; set; }
         public string CellPhone { get; set; }
         public string HomePhone { get; set; }
         public string Email { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public string DateOfBirthStr {
+            get {
+                if (DateOfBirth > new DateTime(1900,1,1)) {
+                    return DateOfBirth.ToString("d");
+                }
+                else {
+                    return null;
+                }
+            }
+        }
 
         public void PadZipCodeWithZeroes() {
             // if the spreadsheet contained the Zip Code as a number, it may have removed
             // leading zeroes. This puts them back
-            if ((ZipCode.Length < 5) && (ZipCode.IsNumeric())) {
-                string fmt = "00000.##";
-                int ZipInt = ZipCode.ToInt();
-                ZipCode = ZipInt.ToString(fmt);
+            if (ZipCode != null) {
+                if ((ZipCode.Length < 5) && (ZipCode.IsNumeric())) {
+                    Log.Information("Padding Zip Code {zip}", ZipCode);
+                    string fmt = "00000.##";
+                    int ZipInt = ZipCode.ToInt();
+                    ZipCode = ZipInt.ToString(fmt);
+                }
             }
         }
 
@@ -51,24 +64,59 @@ namespace ExcelToObjects {
         }
 
         public void RemoveInvalidCharactersFromAddress() {
-            Address = Address.ReplaceInvalidChars();
+            if (Address != null) {
+                Address = Address.ReplaceInvalidChars();
+            }
         }
 
         public void RemoveNonAlphanumericFromAddress() {
-            Address = Address.RemoveNonAlphanumeric();
+            if (Address != null) {
+                Address = Address.RemoveNonAlphanumeric();
+            }
         }
 
         public void ReplaceNumberSignInAddressWithApt() {
-            Address = Address.Replace("#", "Apt ");
+            if (Address != null) {
+                Address = Address.Replace("#", "Apt ");
+            }
         }
 
         public void RemoveMultipleSpacesFromAddress() {
-            Address = Address.ReplaceWhitespaceWithSingleSpace();
+            if (Address != null) {
+                Address = Address.ReplaceWhitespaceWithSingleSpace();
+            }
         }
 
-        public void RemoveNonNumericFromPhones() {
-            CellPhone = CellPhone.RemoveNonNumeric().RemoveWhitespace();
-            HomePhone = HomePhone.RemoveNonNumeric().RemoveWhitespace();
+        public void RemoveNonNumericAndSpacesFromPhones() {
+            RemoveNonNumericFromCellPhone();
+            RemoveNonNumericFromHomePhone();
+        }
+
+        public void SetHomePhoneToNullIfSameAsCellPhone() {
+            if (!string.IsNullOrEmpty(CellPhone) && !string.IsNullOrEmpty(HomePhone)) {
+                if (CellPhone == HomePhone) {
+                    HomePhone = null;
+                }
+            }
+        }
+
+        public void ChangeZeroPhoneValuesToNull() {
+            if (CellPhone == "0")
+                CellPhone = null;
+            if (HomePhone == "0")
+                HomePhone = null;
+        }
+
+        private void RemoveNonNumericFromCellPhone() {
+            if (CellPhone != null) {
+                CellPhone = CellPhone.RemoveNonNumeric().RemoveWhitespace();
+            }
+        }
+
+        private void RemoveNonNumericFromHomePhone() {
+            if (HomePhone != null) {
+                HomePhone = HomePhone.RemoveNonNumeric().RemoveWhitespace();
+            }
         }
 
         public bool EmailIsValid() {
