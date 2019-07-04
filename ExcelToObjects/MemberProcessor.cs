@@ -25,11 +25,16 @@ namespace ExcelToObjects {
         }
 
         public string GetStateAbbreviation(Member member) {
-            return ConvertStateToAbbreviation(member.State.Trim());
+            if (string.IsNullOrEmpty(member.State)) {
+                return null;
+            }
+            else {
+                return ConvertStateToAbbreviation(member.State);
+            }
         }
 
         private string ConvertStateToAbbreviation(string stateName) {
-            string abbreviation = stateName;
+            string abbreviation = null;
             if (string.IsNullOrEmpty(stateName) || (stateName.Length == 2)) {
                 abbreviation = stateName;
             }

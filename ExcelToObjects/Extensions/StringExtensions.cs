@@ -54,8 +54,16 @@ namespace ExcelToObjects {
             return str.Replace(" ", string.Empty);
         }
 
-        // taken from https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format
+        public static string TrimIfNotNull(this string str) {
+            if (!string.IsNullOrEmpty(str)) {
+                return str.Trim();
+            }
+            else {
+                return null;
+            }
+        }
 
+        // taken from https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format
         public static bool IsValidEmail(this string email) {
             if (string.IsNullOrWhiteSpace(email))
                 return false;

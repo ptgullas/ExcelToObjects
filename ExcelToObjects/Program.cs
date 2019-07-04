@@ -111,6 +111,7 @@ namespace ExcelToObjects {
             List<Member> newMembers = new List<Member>();
             foreach (Member m in members) {
                 // Log.Information("Processing member {firstname} {lastname}", m.FirstName, m.LastName);
+                m.TrimAllFields();
                 m.PadZipCodeWithZeroes();
                 m.ReplaceNumberSignInAddressWithApt();
                 m.AppendApartmentToAddress();

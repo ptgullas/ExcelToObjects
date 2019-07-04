@@ -32,6 +32,20 @@ namespace ExcelToObjects {
         // SHOULD NOT BE STORED AS A SEPARATE COLUMN, BUT WILL BE INCORPORATED IN AN EXISTING COLUMN:
         public string Apartment { get; set; }
 
+        public void TrimAllFields() {
+            FirstName = FirstName.TrimIfNotNull();
+            LastName = LastName.TrimIfNotNull();
+            ZipCode = ZipCode.TrimIfNotNull();
+            MiddleName = MiddleName.TrimIfNotNull();
+            NameSuffix = NameSuffix.TrimIfNotNull();
+            Address = Address.TrimIfNotNull();
+            City = City.TrimIfNotNull();
+            State = State.TrimIfNotNull();
+            Email = Email.TrimIfNotNull();
+            CellPhone = CellPhone.TrimIfNotNull();
+            HomePhone = HomePhone.TrimIfNotNull();
+            Apartment = Apartment.TrimIfNotNull();
+        }
 
         public void PadZipCodeWithZeroes() {
             // if the spreadsheet contained the Zip Code as a number, it may have removed
