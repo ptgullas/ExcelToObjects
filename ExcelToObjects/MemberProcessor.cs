@@ -25,7 +25,7 @@ namespace ExcelToObjects {
         }
 
         public string GetStateAbbreviation(Member member) {
-            return ConvertStateToAbbreviation(member.State);
+            return ConvertStateToAbbreviation(member.State.Trim());
         }
 
         private string ConvertStateToAbbreviation(string stateName) {
