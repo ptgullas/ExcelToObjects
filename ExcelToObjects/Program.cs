@@ -113,6 +113,7 @@ namespace ExcelToObjects {
                 // Log.Information("Processing member {firstname} {lastname}", m.FirstName, m.LastName);
                 m.PadZipCodeWithZeroes();
                 m.ReplaceNumberSignInAddressWithApt();
+                m.AppendApartmentToAddress();
                 m.RemoveNonAlphanumericFromAddress();
                 m.RemoveMultipleSpacesFromAddress();
                 m.RemoveNonNumericAndSpacesFromPhones();

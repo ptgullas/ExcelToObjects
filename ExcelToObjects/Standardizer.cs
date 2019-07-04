@@ -49,6 +49,7 @@ namespace ExcelToObjects {
                 .WithOptionalProperty(p => p.HomePhone, GetHomePhoneColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.Email, GetEmailColumnNumber(headers).ToLetter())
                 .WithOptionalProperty(p => p.DateOfBirth, GetDateOfBirthColumnNumber(headers).ToLetter())
+                .WithOptionalProperty(p => p.Apartment, GetApartmentColumnNumber(headers).ToLetter())
                 .GetData(2, sheet.Dimension.Rows)
                 .ToList();
             return members;
@@ -126,6 +127,9 @@ namespace ExcelToObjects {
             if (zipColumnNumber == 0) {
                 zipColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Zip");
             }
+            if (zipColumnNumber == 0) {
+                zipColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Postal");
+            }
             return zipColumnNumber;
         }
 
@@ -196,6 +200,17 @@ namespace ExcelToObjects {
                 birthdateColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "DOB");
             }
             return birthdateColumnNumber;
+        }
+
+        public int GetApartmentColumnNumber(List<string> headers) {
+            int apartmentColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Apt");
+            if (apartmentColumnNumber == 0) {
+                apartmentColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Apartment");
+            }
+            if (apartmentColumnNumber == 0) {
+                apartmentColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Unit");
+            }
+            return apartmentColumnNumber;
         }
 
         public int GetColumnNumberOfFieldThatContains(List<string> headers, string fieldNameToSearch) {

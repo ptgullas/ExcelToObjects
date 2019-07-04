@@ -29,6 +29,9 @@ namespace ExcelToObjects {
                 }
             }
         }
+        // SHOULD NOT BE STORED AS A SEPARATE COLUMN, BUT WILL BE INCORPORATED IN AN EXISTING COLUMN:
+        public string Apartment { get; set; }
+
 
         public void PadZipCodeWithZeroes() {
             // if the spreadsheet contained the Zip Code as a number, it may have removed
@@ -116,6 +119,28 @@ namespace ExcelToObjects {
         private void RemoveNonNumericFromHomePhone() {
             if (HomePhone != null) {
                 HomePhone = HomePhone.RemoveNonNumeric().RemoveWhitespace();
+            }
+        }
+
+        public void AppendApartmentToAddress() {
+            RemoveNAFromApartment();
+            RemoveAptFromApartment();
+            if (Apartment != null) {
+                Address = $"{Address} Apt {Apartment}";
+            }
+        }
+
+        private void RemoveNAFromApartment() {
+            if (Apartment != null) {
+                if (Apartment.RemoveNonAlphanumeric().ToLower() == "na") {
+                    Apartment = null;
+                }
+            }
+        }
+
+        private void RemoveAptFromApartment() {
+            if (Apartment != null) {
+                Apartment = Apartment.Replace("Apt", "");
             }
         }
 
