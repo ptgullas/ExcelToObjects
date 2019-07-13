@@ -61,8 +61,7 @@ namespace ExcelToObjects {
         {
             List<string> inputSpreadsheets = GetFilePaths(inputFolder);
             Log.Information("Found {spreadsheetCount} spreadsheets", inputSpreadsheets.Count);
-            foreach (string path in inputSpreadsheets)
-            {
+            foreach (string path in inputSpreadsheets) {
                 try {
                     Log.Information("Processing spreadsheet {path}", path);
                     Standardizer standardizer = new Standardizer();
