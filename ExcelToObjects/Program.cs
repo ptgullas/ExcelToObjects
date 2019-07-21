@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Threading.Tasks;
+using ExcelToObjects.Extensions;
 
 namespace ExcelToObjects {
     class Program {
@@ -109,8 +110,9 @@ namespace ExcelToObjects {
             MemberProcessor memberProcessor = new MemberProcessor(zipRetriever);
             List<Member> newMembers = new List<Member>();
 
-            // using Select like this lets us use i as the index
-            foreach (Member m in members) {
+            // this lets us capture the index
+            // borrowed from here: https://stackoverflow.com/a/39997157/11199987
+            foreach (var (m, index) in members.WithIndex()) {
                 
                 // Log.Information("Processing member {firstname} {lastname}", m.FirstName, m.LastName);
                 m.TrimAllFields();
@@ -123,7 +125,7 @@ namespace ExcelToObjects {
                 m.ChangeZeroPhoneValuesToNull();
                 m.SetHomePhoneToNullIfSameAsCellPhone();
                 m.RemoveNAFromEmail();
-                m.State = memberProcessor.GetStateAbbreviation(m);
+                m.State = memberProcessor.GetStateAbbreviation(m, index);
                 // m.ZipCode = await memberProcessor.GetZipFromMemberAddress(m);
                 newMembers.Add(m);
                 // Log.Information("Adding {firstName} {lastName} to newMembers", m.FirstName, m.LastName);

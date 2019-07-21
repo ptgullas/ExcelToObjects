@@ -24,16 +24,16 @@ namespace ExcelToObjects {
             return zip;
         }
 
-        public string GetStateAbbreviation(Member member) {
+        public string GetStateAbbreviation(Member member, int index) {
             if (string.IsNullOrEmpty(member.State)) {
                 return null;
             }
             else {
-                return ConvertStateToAbbreviation(member.State);
+                return ConvertStateToAbbreviation(member.State, index);
             }
         }
 
-        private string ConvertStateToAbbreviation(string stateName) {
+        private string ConvertStateToAbbreviation(string stateName, int index) {
             string abbreviation = null;
             if (string.IsNullOrEmpty(stateName) || (stateName.Length == 2)) {
                 abbreviation = stateName;
@@ -42,7 +42,7 @@ namespace ExcelToObjects {
                 abbreviation = stateToAbbrev[stateName.ToLower()];
             }
             else {
-                Log.Error("Row contains invalid US State: {stateName}", stateName);
+                Log.Error("Row {row} contains invalid US State: {stateName}", index, stateName);
             }
             return abbreviation;
         }
