@@ -108,7 +108,10 @@ namespace ExcelToObjects {
             ZipCodeRetrieverService zipRetriever = new ZipCodeRetrieverService(GoogleApiKey);
             MemberProcessor memberProcessor = new MemberProcessor(zipRetriever);
             List<Member> newMembers = new List<Member>();
+
+            // using Select like this lets us use i as the index
             foreach (Member m in members) {
+                
                 // Log.Information("Processing member {firstname} {lastname}", m.FirstName, m.LastName);
                 m.TrimAllFields();
                 m.PadZipCodeWithZeroes();
@@ -119,6 +122,7 @@ namespace ExcelToObjects {
                 m.RemoveNonNumericAndSpacesFromPhones();
                 m.ChangeZeroPhoneValuesToNull();
                 m.SetHomePhoneToNullIfSameAsCellPhone();
+                m.RemoveNAFromEmail();
                 m.State = memberProcessor.GetStateAbbreviation(m);
                 // m.ZipCode = await memberProcessor.GetZipFromMemberAddress(m);
                 newMembers.Add(m);

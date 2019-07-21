@@ -23,5 +23,21 @@ namespace ExcelToObjects.Test {
 
             Assert.Equal(expected, strToTest.ReplaceWhitespaceWithSingleSpace());
         }
+
+        [Fact]
+        public void ReplaceNAWithBlank_ReplacesNA() {
+            string strToTest = "n/a";
+            string expected = "";
+
+            Assert.Equal(expected, strToTest.GetNullIfNA());
+        }
+
+        [Fact]
+        public void ReplaceNAWithBlank_DoesNotReplaceNonNA() {
+            string strToTest = "I am some content";
+            string expected = "I am some content";
+
+            Assert.Equal(expected, strToTest.GetNullIfNA());
+        }
     }
 }

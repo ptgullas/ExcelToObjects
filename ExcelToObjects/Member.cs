@@ -146,15 +146,24 @@ namespace ExcelToObjects {
 
         private void RemoveNAFromApartment() {
             if (Apartment != null) {
-                if (Apartment.RemoveNonAlphanumeric().ToLower() == "na") {
-                    Apartment = null;
-                }
+                Apartment = Apartment.GetNullIfNA();
+                //if (Apartment.RemoveNonAlphanumeric().ToLower() == "na") {
+                //    Apartment = null;
+                //}
             }
         }
 
         private void RemoveAptFromApartment() {
             if (Apartment != null) {
-                Apartment = Apartment.Replace("Apt", "");
+                // replace this with a case-insensitive version
+                // Apartment = Apartment.Replace("Apt", "");
+                Apartment = Apartment.Replace("Apt", "", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public void RemoveNAFromEmail() {
+            if (Email != null) {
+                Email = Email.GetNullIfNA();
             }
         }
 
