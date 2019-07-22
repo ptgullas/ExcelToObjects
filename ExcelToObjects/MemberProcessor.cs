@@ -42,7 +42,7 @@ namespace ExcelToObjects {
                 abbreviation = stateToAbbrev[stateName.ToLower()];
             }
             else {
-                Log.Error("Row {row} contains invalid US State: {stateName}", index, stateName);
+                Log.Warning("Row {row} contains invalid US State: {stateName}", index, stateName);
             }
             return abbreviation;
         }

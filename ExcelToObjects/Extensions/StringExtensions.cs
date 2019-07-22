@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Serilog;
 
 namespace ExcelToObjects {
     public static class StringExtensions {
@@ -202,10 +203,11 @@ namespace ExcelToObjects {
                 }
             }
             catch (RegexMatchTimeoutException e) {
-               
+                Log.Error(e, "Failed to validate email address {email} due to timeout", email);
                 return false;
             }
             catch (ArgumentException e) {
+                Log.Error(e, "Failed to validate email address {email} (ArgumentException)", email);
                 return false;
             }
 
