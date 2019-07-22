@@ -191,6 +191,12 @@ namespace ExcelToObjects {
             if (emailColumnNumber == 0) {
                 emailColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "E-mail");
             }
+            if (emailColumnNumber == 0) {
+                emailColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Email");
+            }
+            if (emailColumnNumber == 0) {
+                emailColumnNumber = GetColumnNumberOfFieldThatContains(headers, "E-mail");
+            }
             return emailColumnNumber;
         }
 
