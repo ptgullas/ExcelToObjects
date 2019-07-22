@@ -167,6 +167,9 @@ namespace ExcelToObjects {
         public int GetCellPhoneColumnNumber(List<string> headers) {
             int cellPhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Cell");
             if (cellPhoneColumnNumber == 0) {
+                cellPhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Mobile");
+            }
+            if (cellPhoneColumnNumber == 0) {
                 cellPhoneColumnNumber = GetColumnNumberOfFieldThatStartsWith(headers, "Phone");
             }
             if (cellPhoneColumnNumber == 0) {
