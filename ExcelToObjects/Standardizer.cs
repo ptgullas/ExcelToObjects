@@ -141,6 +141,9 @@ namespace ExcelToObjects {
             if (addressColumnNumber == 0) {
                 addressColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Street");
             }
+            if (addressColumnNumber == 0) {
+                addressColumnNumber = GetColumnNumberOfFieldThatContains(headers, "Address");
+            }
             return addressColumnNumber;
         }
 
