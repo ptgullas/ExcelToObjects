@@ -32,17 +32,78 @@ namespace ExcelToObjects {
             Configuration = builder.Build();
 
             try {
-                //string GoogleApiKey = Configuration.GetValue<string>("GoogleApiKey");
-                //ZipCodeRetrieverService zipRetriever = new ZipCodeRetrieverService(GoogleApiKey);
-                //string myAddress = "225 e 17th street, new york ny";
-                //string myZip = await zipRetriever.GetZip(myAddress);
-                //Console.WriteLine($"Full Address is {myAddress} {myZip}");
-                await ProcessSpreadsheets();
+
+                if (args.Length == 0) {
+                    DisplayHelpText();
+                }
+                else {
+                    await ProcessArgs(args);
+                }
+
                 Log.Information("Exiting nicely");
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
+        }
+
+
+
+        static async Task ProcessArgs(string[] args) {
+            foreach (string arg in args) {
+                switch(arg.Substring(0).ToUpper()) {
+                    case "--HELP":
+                        Console.WriteLine($"OK you correctly passed --help!");
+                        DisplayHelpText();
+                        break;
+                    case "--PROCESS":
+                        Console.WriteLine($"OK, you correctly passed --process!");
+                        // await TestZipCodeRetriever();
+                        await ProcessSpreadsheets();
+                        break;
+                    case "--COUNT":
+                        Console.WriteLine($"OK, will start counting worksheets");
+                        GetSpreadsheetsToCountWorksheets();
+                        break;
+                }
+            }
+        }
+        static void DisplayHelpText() {
+            string s = "ExcelToObjects.\n";
+            s += "By Paul T. Gullas\n";
+            s += "Display this help text: dotnet run or dotnet run -- --help\n";
+            s += "Switches:\n";
+            s += "dotnet run -- --count: Counts # of worksheets in spreadsheets in 'worksheetCountFolder'\n";
+            s += "dotnet run -- --process: Process spreadsheets\n";
+            Console.WriteLine(s);
+        }
+
+        private static void GetSpreadsheetsToCountWorksheets() {
+            string path = Configuration.GetSection("Folders").GetValue<string>("worksheetCountFolder");
+            if (Directory.Exists(path)) {
+                List<string> spreadsheetsToCount = GetFilePaths(path);
+                Log.Information("Found {spreadsheetCount} spreadsheets to count in {path}", spreadsheetsToCount.Count, path);
+                foreach (string spreadsheet in spreadsheetsToCount) {
+                    LogWorksheetCount(spreadsheet);
+                }
+            }
+        }
+
+        private static void LogWorksheetCount(string spreadsheet) {
+            FileInfo sourceFile = new FileInfo(spreadsheet);
+            using (ExcelPackage package = new ExcelPackage(sourceFile)) {
+                int worksheetCount = package.Workbook.Worksheets.Count;
+                string fileName = Path.GetFileName(spreadsheet);
+                Log.Information("File {filename}: Worksheets: {worksheetCount}", fileName, worksheetCount);
+            }
+        }
+
+        private static async Task TestZipCodeRetriever() {
+            string GoogleApiKey = Configuration.GetValue<string>("GoogleApiKey");
+            ZipCodeRetrieverService zipRetriever = new ZipCodeRetrieverService(GoogleApiKey);
+            string myAddress = "225 e 17th street, new york ny";
+            string myZip = await zipRetriever.GetZip(myAddress);
+            Console.WriteLine($"Full Address is {myAddress} {myZip}");
         }
 
         private static async Task ProcessSpreadsheets() {
