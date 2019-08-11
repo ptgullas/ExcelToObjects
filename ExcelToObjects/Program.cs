@@ -35,6 +35,7 @@ namespace ExcelToObjects {
 
                 if (args.Length == 0) {
                     DisplayHelpText();
+                    await ProcessSpreadsheets();
                 }
                 else {
                     await ProcessArgs(args);
@@ -71,7 +72,8 @@ namespace ExcelToObjects {
         static void DisplayHelpText() {
             string s = "ExcelToObjects.\n";
             s += "By Paul T. Gullas\n";
-            s += "Display this help text: dotnet run or dotnet run -- --help\n";
+            s += "Display this help text: dotnet run -- --help\n";
+            s += "dotnet run: Display help text then process spreadsheets\n";
             s += "Switches:\n";
             s += "dotnet run -- --count: Counts # of worksheets in spreadsheets in 'worksheetCountFolder'\n";
             s += "dotnet run -- --process: Process spreadsheets\n";
