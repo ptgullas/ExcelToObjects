@@ -144,26 +144,50 @@ namespace ExcelToObjects {
 
         private static async Task ProcessSingleFile(string myPath, string outputDir, Standardizer standardizer) {
             if (File.Exists(myPath)) {
-                FileInfo sourceFile = new FileInfo(myPath);
-                List<Member> members = new List<Member>();
-                string newWorksheetName = null;
-                using (ExcelPackage package = new ExcelPackage(sourceFile)) {
-                    Log.Information("Retrieving members from {sourceFile}", sourceFile.Name);
-                    members = standardizer.GetMembers(package, 0);
-                    newWorksheetName = GetWorksheetName(package, 0);
+                List<MembersInWorksheet> membersInSpreadsheet = GetMembersFromWorksheets(myPath, standardizer);
+
+                await ProcessMembersInSpreadsheet(membersInSpreadsheet);
+
+                ExportMembersToNewSpreadsheet(myPath, outputDir, standardizer, membersInSpreadsheet);
+            }
+        }
+
+        private static void ExportMembersToNewSpreadsheet(string myPath, string outputDir, Standardizer standardizer, List<MembersInWorksheet> membersInSpreadsheet) {
+            string newFilename = Path.GetFileNameWithoutExtension(myPath) + "_transformed.xlsx";
+            string targetPath = Path.Combine(outputDir, newFilename);
+            FileInfo targetFile = new FileInfo(targetPath);
+
+
+            using (ExcelPackage targetPackage = new ExcelPackage(targetFile)) {
+                foreach (MembersInWorksheet membersInWorksheet in membersInSpreadsheet) {
+                    standardizer.ExportMembers(targetPackage, membersInWorksheet.NewWorksheetName, membersInWorksheet.Members);
                 }
+                targetPackage.SaveAs(targetFile);
+            }
+        }
 
-                members = await ProcessMembers(members);
-
-                string newFilename = Path.GetFileNameWithoutExtension(myPath) + "_transformed.xlsx";
-                string targetPath = Path.Combine(outputDir, newFilename);
-                FileInfo targetFile = new FileInfo(targetPath);
-
-
-                using (ExcelPackage targetPackage = new ExcelPackage(targetFile)) {
-                    standardizer.ExportMembers(targetPackage, newWorksheetName, members);
-                    targetPackage.SaveAs(targetFile);
+        private static List<MembersInWorksheet> GetMembersFromWorksheets(string myPath, Standardizer standardizer) {
+            FileInfo sourceFile = new FileInfo(myPath);
+            List<MembersInWorksheet> membersInSpreadsheet = new List<MembersInWorksheet>();
+            using (ExcelPackage package = new ExcelPackage(sourceFile)) {
+                Log.Information("Retrieving members from {sourceFile}", sourceFile.Name);
+                int worksheetCount = package.Workbook.Worksheets.Count;
+                for (int currentWorksheet = 0; currentWorksheet < worksheetCount; currentWorksheet++) {
+                    MembersInWorksheet membersInWorksheet = new MembersInWorksheet();
+                    string worksheetName = GetWorksheetName(package.Workbook, currentWorksheet);
+                    Log.Information("Retrieving members from worksheet {worksheetName}", worksheetName);
+                    membersInWorksheet.Members = standardizer.GetMembers(package, currentWorksheet);
+                    membersInWorksheet.NewWorksheetName = worksheetName;
+                    membersInSpreadsheet.Add(membersInWorksheet);
                 }
+            }
+
+            return membersInSpreadsheet;
+        }
+
+        private static async Task ProcessMembersInSpreadsheet(List<MembersInWorksheet> membersInSpreadsheet) {
+            foreach (MembersInWorksheet membersInWorksheet in membersInSpreadsheet) {
+                membersInWorksheet.Members = await ProcessMembers(membersInWorksheet.Members);
             }
         }
 
@@ -196,15 +220,13 @@ namespace ExcelToObjects {
             return newMembers;
         }
 
-        static string GetWorksheetName(ExcelPackage package, int worksheetNum) {
+        static string GetWorksheetName(ExcelWorkbook workbook, int worksheetNum) {
             string name = null;
-            using (package) {
-                if (worksheetNum <= (package.Workbook.Worksheets.Count - 1)) {
-                    name = package.Workbook.Worksheets[worksheetNum].Name;
-                }
-                else {
-                    throw new ArgumentOutOfRangeException("worksheetNum", "Invalid workbook number");
-                }
+            if (worksheetNum <= (workbook.Worksheets.Count - 1)) {
+                name = workbook.Worksheets[worksheetNum].Name;
+            }
+            else {
+                throw new ArgumentOutOfRangeException("worksheetNum", "Invalid workbook number");
             }
             return name;
         }
