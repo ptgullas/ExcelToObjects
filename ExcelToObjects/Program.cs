@@ -145,9 +145,7 @@ namespace ExcelToObjects {
         private static async Task ProcessSingleFile(string myPath, string outputDir, Standardizer standardizer) {
             if (File.Exists(myPath)) {
                 List<MembersInWorksheet> membersInSpreadsheet = GetMembersFromWorksheets(myPath, standardizer);
-
                 await ProcessMembersInSpreadsheet(membersInSpreadsheet);
-
                 ExportMembersToNewSpreadsheet(myPath, outputDir, standardizer, membersInSpreadsheet);
             }
         }
@@ -156,7 +154,6 @@ namespace ExcelToObjects {
             string newFilename = Path.GetFileNameWithoutExtension(myPath) + "_transformed.xlsx";
             string targetPath = Path.Combine(outputDir, newFilename);
             FileInfo targetFile = new FileInfo(targetPath);
-
 
             using (ExcelPackage targetPackage = new ExcelPackage(targetFile)) {
                 foreach (MembersInWorksheet membersInWorksheet in membersInSpreadsheet) {
@@ -176,8 +173,8 @@ namespace ExcelToObjects {
                     MembersInWorksheet membersInWorksheet = new MembersInWorksheet();
                     string worksheetName = GetWorksheetName(package.Workbook, currentWorksheet);
                     Log.Information("Retrieving members from worksheet {worksheetName}", worksheetName);
-                    membersInWorksheet.Members = standardizer.GetMembers(package, currentWorksheet);
                     membersInWorksheet.NewWorksheetName = worksheetName;
+                    membersInWorksheet.Members = standardizer.GetMembers(package, currentWorksheet);
                     membersInSpreadsheet.Add(membersInWorksheet);
                 }
             }
@@ -197,7 +194,7 @@ namespace ExcelToObjects {
             MemberProcessor memberProcessor = new MemberProcessor(zipRetriever);
             List<Member> newMembers = new List<Member>();
 
-            // this lets us capture the index
+            // this lets us capture the index (row number)
             // borrowed from here: https://stackoverflow.com/a/39997157/11199987
             foreach (var (m, index) in members.WithIndex()) {
                 
